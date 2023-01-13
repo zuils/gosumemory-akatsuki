@@ -104,23 +104,30 @@ func GetFCData() {
 						time.Sleep(250 * time.Millisecond)
 						continue
 					}
-					//TODO: figure out how to calc %% pp on the new rework
-					// if memory.GameplayData.GameMode == 0 {
-					// 	wiekuCalcCrutch(memory.MenuData.Bm.Path.FullDotOsu, int16(memory.MenuData.Bm.Stats.BeatmapMaxCombo), desired300Hits())
-					// }
-					var data PPfc
-					readFCData(&data, ezfc, 100.0)
-					memory.MenuData.PP.PpSS = cast.ToInt32(float64(data.Acc))
-					readFCData(&data, ezfc, 99.0)
-					memory.MenuData.PP.Pp99 = cast.ToInt32(float64(data.Acc))
-					readFCData(&data, ezfc, 98.0)
-					memory.MenuData.PP.Pp98 = cast.ToInt32(float64(data.Acc))
-					readFCData(&data, ezfc, 97.0)
-					memory.MenuData.PP.Pp97 = cast.ToInt32(float64(data.Acc))
-					readFCData(&data, ezfc, 96.0)
-					memory.MenuData.PP.Pp96 = cast.ToInt32(float64(data.Acc))
-					readFCData(&data, ezfc, 95.0)
-					memory.MenuData.PP.Pp95 = cast.ToInt32(float64(data.Acc))
+					if memory.GameplayData.GameMode == 0 {
+						path := memory.MenuData.Bm.Path.FullDotOsu
+						memory.MenuData.PP.PpSS = wiekuCalcFC(path, 100.0)
+						memory.MenuData.PP.Pp99 = wiekuCalcFC(path, 99.0)
+						memory.MenuData.PP.Pp98 = wiekuCalcFC(path, 98.0)
+						memory.MenuData.PP.Pp97 = wiekuCalcFC(path, 97.0)
+						memory.MenuData.PP.Pp96 = wiekuCalcFC(path, 96.0)
+						memory.MenuData.PP.Pp95 = wiekuCalcFC(path, 95.0)
+
+					} else {
+						var data PPfc
+						readFCData(&data, ezfc, 100.0)
+						memory.MenuData.PP.PpSS = cast.ToInt32(float64(data.Acc))
+						readFCData(&data, ezfc, 99.0)
+						memory.MenuData.PP.Pp99 = cast.ToInt32(float64(data.Acc))
+						readFCData(&data, ezfc, 98.0)
+						memory.MenuData.PP.Pp98 = cast.ToInt32(float64(data.Acc))
+						readFCData(&data, ezfc, 97.0)
+						memory.MenuData.PP.Pp97 = cast.ToInt32(float64(data.Acc))
+						readFCData(&data, ezfc, 96.0)
+						memory.MenuData.PP.Pp96 = cast.ToInt32(float64(data.Acc))
+						readFCData(&data, ezfc, 95.0)
+						memory.MenuData.PP.Pp95 = cast.ToInt32(float64(data.Acc))
+					}
 				}
 			}
 

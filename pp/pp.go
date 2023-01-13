@@ -4,13 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"os"
 	"strings"
 	"time"
 	"unsafe"
 
 	"github.com/Wieku/gosu-pp/beatmap"
-	"github.com/Wieku/gosu-pp/beatmap/difficulty"
 	"github.com/Wieku/gosu-pp/performance/osu"
 	"github.com/k0kubun/pp"
 	"github.com/l3lackShark/gosumemory/memory"
@@ -310,40 +308,18 @@ var (
 )
 
 func wiekuCalcCrutch(path string, combo int16, h300 int16, h100 int16, h50 int16, h0 int16) (int32, error) {
-	if tempWiekuFileName != path || tempWiekuMods != memory.MenuData.Mods.AppliedMods {
-		tempWiekuFileName = path
-		tempWiekuMods = memory.MenuData.Mods.AppliedMods
-
-		osuFile, err := os.Open(path)
-		if err != nil {
-			return 0, fmt.Errorf("Failed to calc via wieku calculator, falling back to oppai, ERROR: %w", err)
-		}
-		defer osuFile.Close()
-
-		beatMap, err = beatmap.ParseFromReader(osuFile)
-		if err != nil {
-			return 0, fmt.Errorf("Failed to calc via wieku calculator, falling back to oppai, ERROR: %w", err)
-		}
-
-		beatMap.Difficulty.SetMods(difficulty.Modifier(memory.MenuData.Mods.AppliedMods))
-		attribs = osu.CalculateStep(beatMap.HitObjects, beatMap.Difficulty)
-	}
-
 	// Include Akatsuki PP Go
 	mods := memory.MenuData.Mods.AppliedMods
 	acc := memory.GameplayData.Accuracy
-	ppAkatsuki := performance.Calculate(path, 0, mods, int32(combo), acc, int32(h0))
+	gamemode := memory.GameplayData.GameMode
+	ppAkatsuki := performance.Calculate(path, gamemode, mods, int32(combo), acc, int32(h0))
 	return cast.ToInt32(math.Max(0, ppAkatsuki.PP)), nil
+}
 
-	ppWieku := &osu.PPv2{}
-
-	currAttrib := int(math.Max(0, float64(h300+h100+h50+h0-1)))
-
-	if len(attribs)-1 < currAttrib {
-		return 0, nil //rade condition hell
-	}
-
-	ppWieku.PPv2x(attribs[currAttrib], int(combo), int(h300), int(h100), int(h50), int(h0), beatMap.Difficulty)
-
-	return cast.ToInt32(ppWieku.Results.Total), nil
+func wiekuCalcFC(path string, acc float64) int32 {
+	// Include Akatsuki PP Go
+	mods := memory.MenuData.Mods.AppliedMods
+	gamemode := memory.GameplayData.GameMode
+	ppAkatsuki := performance.Calculate(path, gamemode, mods, memory.MenuData.Bm.Stats.BeatmapMaxCombo, acc, 0)
+	return cast.ToInt32(math.Max(0, ppAkatsuki.PP))
 }
