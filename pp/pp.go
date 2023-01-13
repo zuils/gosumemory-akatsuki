@@ -14,6 +14,7 @@ import (
 	"github.com/Wieku/gosu-pp/performance/osu"
 	"github.com/k0kubun/pp"
 	"github.com/l3lackShark/gosumemory/memory"
+	"github.com/osuAkatsuki/akatsuki-pp-go/performance"
 	"github.com/spf13/cast"
 )
 
@@ -327,6 +328,12 @@ func wiekuCalcCrutch(path string, combo int16, h300 int16, h100 int16, h50 int16
 		beatMap.Difficulty.SetMods(difficulty.Modifier(memory.MenuData.Mods.AppliedMods))
 		attribs = osu.CalculateStep(beatMap.HitObjects, beatMap.Difficulty)
 	}
+
+	// Include Akatsuki PP Go
+	mods := memory.MenuData.Mods.AppliedMods
+	acc := memory.GameplayData.Accuracy
+	ppAkatsuki := performance.Calculate(path, 0, mods, int32(combo), acc, int32(h0))
+	return cast.ToInt32(math.Max(0, ppAkatsuki.PP)), nil
 
 	ppWieku := &osu.PPv2{}
 
