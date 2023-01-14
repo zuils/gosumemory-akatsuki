@@ -312,8 +312,8 @@ func wiekuCalcCrutch(path string, combo int16, h300 int16, h100 int16, h50 int16
 	mods := memory.MenuData.Mods.AppliedMods
 	acc := memory.GameplayData.Accuracy
 	gamemode := memory.GameplayData.GameMode
-	ppAkatsuki := performance.Calculate(path, gamemode, mods, int32(combo), acc, int32(h0))
-	return cast.ToInt32(math.Max(0, ppAkatsuki.PP)), nil
+	ppValue := performance.Calculate(path, gamemode, mods, int32(combo), acc, int32(h0)).PP
+	return cast.ToInt32(math.Max(0, ppValue)), nil
 }
 
 func wiekuCalcFC(path string, acc float64) int32 {
