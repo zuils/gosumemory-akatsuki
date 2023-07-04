@@ -46,112 +46,6 @@ var process mem.Process
 var procerr error
 var tempRetries int32
 
-// Hit events
-var hitEventBaseAddress struct {
-	Playing int32
-	Replay  int32
-}
-
-var hitEventPreOffset [4]int32 = [4]int32{-1, -1, -1, -1}
-var hitEventAddress [5]int32 = [5]int32{0, 0, 0, 0, 0}
-var hitEventIndexIncrement int32 = 0
-var prePlayTime int32 = 2147483647
-var preStatus uint32 = 100
-var hitEventFrame []hitEvent
-var currentHitEventFrameIndex int
-var prevHitEventFrameSize int = 0
-
-func getHitEventOffset(depth int32, index int32) int32 {
-	switch depth {
-	case 0:
-		return 0x34
-	case 1:
-		return 0x4
-	case 2:
-		return 0x8 + index*0x4
-	case 3:
-		return 0
-	default:
-		return -1 // this should not happen
-	}
-}
-
-type addrWithMask struct {
-	string
-	int
-}
-
-func resolveHitEventAddress() error {
-	var _hitEventMemPatterns struct {
-		Playing []addrWithMask
-		Replay  []addrWithMask
-	} = struct {
-		Playing []addrWithMask
-		Replay  []addrWithMask
-	}{ // hit event addr may have different pattern
-		[]addrWithMask{
-			{"83 7E 60 00 74 2C A1 ?? ?? ?? ?? 8B 50 1C 8B 4A 04", 7},
-			{"5D C3 A1 ?? ?? ?? ?? 8B 50 1C 8B 4A 04", 3},
-		},
-		[]addrWithMask{
-			{"D9 5D C0 EB 4E A1 ?? ?? ?? ?? 8B 48 34 4E", 6},
-			{"74 4D A1 ?? ?? ?? ?? 8B 58 34 8D 46 FF", 3},
-			{"A1 ?? ?? ?? ?? 8B 40 34 8B 70 0C", 1},
-			{"75 0E 33 D2 89 15 ?? ?? ?? ?? 89 15", 6},
-		},
-	}
-
-	if hitEventBaseAddress.Playing == 0 {
-		var errMsg string = ""
-		var resolved = false
-		for i, t := range _hitEventMemPatterns.Playing {
-			base, err := mem.Scan(process, t.string)
-			if err != nil || base == 0 {
-				errMsg += err.Error() + "; "
-				continue
-			}
-			addr, err := mem.ReadInt32(process, base, int64(t.int))
-			if err != nil || addr == 0 {
-				errMsg += err.Error() + "; "
-				continue
-			} else {
-				hitEventBaseAddress.Playing = addr
-				resolved = true
-				log.Printf("Resolved hit event(playing) at 0x%x by pattern #%d.\n", addr, i)
-				break
-			}
-		}
-		if !resolved {
-			return fmt.Errorf("err resolving hit event(playing) address: %s", errMsg)
-		}
-	}
-	if hitEventBaseAddress.Replay == 0 {
-		var errMsg string = ""
-		var resolved = false
-		for i, t := range _hitEventMemPatterns.Replay {
-			base, err := mem.Scan(process, t.string)
-			if err != nil || base == 0 {
-				errMsg += err.Error() + "; "
-				continue
-			}
-			addr, err := mem.ReadInt32(process, base, int64(t.int))
-			if err != nil || addr == 0 {
-				errMsg += err.Error() + "; "
-				continue
-			} else {
-				hitEventBaseAddress.Replay = addr
-				resolved = true
-				log.Printf("Resolved hit event(replay) at 0x%x by pattern #%d.\n", addr, i)
-				break
-			}
-		}
-		if !resolved {
-			return fmt.Errorf("err resolving hit event(replay) address: %s", errMsg)
-		}
-	}
-	return nil
-}
-
 // Init the whole thing and get osu! memory values to start working with it.
 func Init() {
 	if UnderWine == true || runtime.GOOS != "windows" { //Arrays start at 0xC in Linux for some reason, has to be wine specific
@@ -190,7 +84,7 @@ func Init() {
 				&menuData.PreSongSelectData)
 			if err != nil {
 				DynamicAddresses.IsReady = false
-				log.Println("It appears that we lost the precess, retrying! ERROR:", err)
+				log.Println("It appears that we lost the process, retrying! ERROR:", err)
 				continue
 			}
 			MenuData.OsuStatus = menuData.Status
@@ -395,11 +289,11 @@ func getGamplayData() {
 	} else {
 		MenuData.Mods.PpMods = Mods(gameplayData.ModsXor1 ^ gameplayData.ModsXor2).String()
 	}
-	if strings.Contains(MenuData.Mods.PpMods, "V2") {
-		GameplayData.Score = gameplayData.ScoreV2
-	} else {
-		GameplayData.Score = gameplayData.Score
-	}
+	// if strings.Contains(MenuData.Mods.PpMods, "V2") {
+	GameplayData.Score = gameplayData.ScoreV2
+	// } else {
+	// 	GameplayData.Score = gameplayData.Score
+	// }
 	if GameplayData.Combo.Max > 0 {
 		GameplayData.Hits.HitErrorArray = gameplayData.HitErrors
 		baseUR, _ := calculateUR(GameplayData.Hits.HitErrorArray)
@@ -558,7 +452,8 @@ func ReadManiaStars() (ManiaStars, error) {
 	}
 	err := mem.Read(process, &addresses, &entries)
 	if err != nil || entries.Data == 0 {
-		return ManiaStars{}, errors.New("[MEMORY] Could not find star rating for this map (internal) This probably means that difficulty calculation is in progress")
+		pp.Println("[MEMORY] Could not find star rating for this map or converts not supported yet")
+		return ManiaStars{}, nil
 	}
 	starRating := struct{ Base int64 }{int64(entries.Data)}
 	var stars struct {
