@@ -29,7 +29,7 @@ jobs:
     - name: Clone deps
       run: git clone https://github.com/l3lackShark/static && find win32 win64 lin32 lin64 -maxdepth 0 -exec cp -rf static {} \;
     - name: Upload win32
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v4
       with:
        # Artifact name
         name: gosumemory_windows_386
@@ -37,7 +37,7 @@ jobs:
         path: ./win32
 
     - name: Upload win64
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v4
       with:
        # Artifact name
         name: gosumemory_windows_amd64
@@ -45,7 +45,7 @@ jobs:
         path: ./win64
 
     - name: Upload lin32
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v4
       with:
        # Artifact name
         name: gosumemory_linux_386
@@ -53,7 +53,7 @@ jobs:
         path: ./lin32
         
     - name: Upload lin64
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v4
       with:
        # Artifact name
         name: gosumemory_linux_amd64
