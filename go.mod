@@ -11,7 +11,7 @@ require (
 	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/l3lackShark/config v0.0.0-20201023014929-236482b96fde
 	github.com/mattn/go-colorable v0.1.11 // indirect
-	github.com/osuAkatsuki/akatsuki-pp-go v0.0.0 // indirect
+	github.com/osuAkatsuki/akatsuki-pp-go latest // indirect
 	github.com/rhysd/go-github-selfupdate v1.2.3
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/spf13/cast v1.4.1
